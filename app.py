@@ -146,7 +146,7 @@ def preprocess(image_data, show_preview: bool = False):
         new_h = 20
         new_w = max(1, int(round(w * (20 / h))))
 
-    resized = cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    resized = cropped.resize((new_w, new_h), Image.Resampling.BILINEAR)
 
     # 5) Lägg in i 28x28
     canvas_28 = Image.new("L", (28, 28), 0)
@@ -176,14 +176,14 @@ def preprocess(image_data, show_preview: bool = False):
         a = shifted
 
 	# stärk kontrast
-    a = np.clip(a, 0, 255)
+    # a = np.clip(a, 0, 255)
 
     # ta bort svag grå dimma
-    a[a < 40] = 0
+    # a[a < 40] = 0
 
     # skala upp så max blir 255
-    mx = a.max()
-    if mx > 0:
+    # mx = a.max()
+    # if mx > 0:
         a = a * (255.0 / mx)
 
     img_final = Image.fromarray(a.astype(np.uint8))
