@@ -82,6 +82,7 @@ En viktig lärdom för mig har varit hur avgörande det är att arbeta metodiskt
 
 
 # Streamlit-applikation
+https://inlamning-ml-annab.streamlit.app/
 
 
 I den sista delen av arbetet utvecklade jag en interaktiv Streamlit-applikation som använder den sparade modellen för att prediktera handritade siffror.
