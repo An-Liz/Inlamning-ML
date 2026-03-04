@@ -5,6 +5,16 @@ from PIL import Image, ImageOps, ImageFilter
 import matplotlib.pyplot as plt
 from streamlit_drawable_canvas import st_canvas
 
+st.markdown("""
+    <style>
+    button[kind="primary"] {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 # ===============================
 # PAGE
 # ===============================
@@ -73,7 +83,7 @@ with st.sidebar:
     )
 
     st.divider()
-    st.write("Justera pennbredd om modellen gissar fel.")
+    st.write("Justera pennbredd eller kryssa i/ur förstärk streck om modellen gissar fel.")
 
 # ===============================
 # LAYOUT
@@ -218,7 +228,7 @@ with left:
         predict_clicked = st.button(
             "🔮 Prediktera",
             type="primary",
-            use_container_width=True
+            # use_container_width=True
         )
 
     with c2:
