@@ -192,7 +192,7 @@ def preprocess(image_data, show_preview: bool = False):
 
     img_tmp = Image.fromarray(a.astype(np.uint8))
     if thicken:
-        img_tmp = img_tmp.filter(ImageFilter.MaxFilter(3))
+         img_tmp = img_tmp.filter(ImageFilter.MaxFilter(3))
     img_final = img_tmp
 
     if show_preview:
