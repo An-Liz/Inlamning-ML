@@ -197,7 +197,7 @@ def preprocess(image_data, show_preview: bool = False):
 
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
     # return scaler.transform(flat)
-	return flat
+    return flat
 
 # ===============================
 # CANVAS + BUTTONS
