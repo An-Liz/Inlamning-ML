@@ -99,7 +99,7 @@ def has_ink(image_data, min_pixels: int = 50) -> bool:
     arr = np.array(inv)
     return (arr > 10).sum() > min_pixels  # lågt tröskelvärde bara för 'något finns'
 
-def preprocess(image_data, show_preview: bool = False):
+X = preprocess(canvas_result.image_data, show_preview=show_preprocess)
     """
     Gör canvas-bilden mer MNIST-lik:
     - Gråskala + invert
@@ -197,7 +197,7 @@ with right:
     st.subheader("2️⃣ Resultat")
 
     if predict_clicked:
-        if canvas_result.image_data is None or not has_ink(canvas_result.image_data, threshold):
+        if canvas_result.image_data is None or not has_ink(canvas_result.image_data):
             st.warning("Rita en siffra först 🙂")
         else:
             X = preprocess(canvas_result.image_data, threshold, show_preprocess)
