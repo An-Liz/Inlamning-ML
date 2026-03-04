@@ -143,8 +143,7 @@ with left:
             st.session_state.canvas_key += 1
             st.rerun()
 
-    with c3:
-    with c3:
+        with c3:
         if st.button("🔄 Återställ inställningar", use_container_width=True):
             st.session_state.do_reset_settings = True
             st.rerun()
