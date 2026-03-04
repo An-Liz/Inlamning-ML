@@ -1,4 +1,4 @@
-# Modellera MNIST
+# MNIST-modell
 
 
 ### Inläsning och förståelse av data (Kodblock 1)
