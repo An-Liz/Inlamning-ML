@@ -6,12 +6,35 @@ import matplotlib.pyplot as plt
 from streamlit_drawable_canvas import st_canvas
 
 st.markdown("""
-    <style>
-    button[kind="primary"] {
-        background-color: #28a745 !important;
-        color: white !important;
-    }
-    </style>
+<style>
+
+/* Alla knappar – samma storlek */
+div.stButton > button {
+    height: 3em;
+    width: 180px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+}
+
+/* Prediktera – mörkgrön */
+button[kind="primary"] {
+    background-color: #1e7e34 !important;
+    color: white !important;
+    border: none !important;
+}
+
+button[kind="primary"]:hover {
+    background-color: #18692c !important;
+}
+
+/* Ta bort röd outline */
+button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
 
@@ -222,24 +245,20 @@ with left:
         key=f"canvas_{st.session_state.canvas_key}",
     )
 
-    c1, c2, c3 = st.columns(3)
+  
 
-    with c1:
-        predict_clicked = st.button(
-            "🔮 Prediktera",
-            type="primary",
-            # use_container_width=True
-        )
+    col1, col2, col3 = st.columns([1,1,1])
 
-    with c2:
-        if st.button("🧽 Prova igen", use_container_width=True):
-            st.session_state.canvas_key += 1
-            st.rerun()
+    with col1:
+        predict_clicked = st.button("🔮 Prediktera", type="primary", use_container_width=True)
 
-    with c3:
-        if st.button("🔄 Återställ inställningar", use_container_width=True):
-            st.session_state.do_reset_settings = True
-            st.rerun()
+    with col2:
+        reset_clicked = st.button("🧽 Prova igen", use_container_width=True)
+
+    with col3:
+        settings_reset = st.button("🔄 Återställ inställningar", use_container_width=True)
+
+
 
 # ===============================
 # RESULTAT
