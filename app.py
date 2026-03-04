@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 st.title("🔢 Prova sifferigenkänning med MNIST")
-st.caption("Rita en siffra till vänster och klicka på **Prediktera**. Du kan ändra inställningar till vänster.")
+st.caption("Rita en siffra till vänster och klicka på **Prediktera**.")
 st.divider()
 
 # ===============================
@@ -51,34 +51,29 @@ def load_artifacts():
 
 model, scaler = load_artifacts()
 
+
 # ===============================
 # SIDEBAR SETTINGS
 # ===============================
 with st.sidebar:
     st.header("⚙️ Inställningar")
 
-thicken = st.sidebar.checkbox("Förstärk streck (endast konturer)", value=True)
+    thicken = st.checkbox("Förstärk streck (endast konturer)", value=True)
 
-stroke_width = st.slider(
+    stroke_width = st.slider(
         "Pennbredd",
-        4, 30,
-        st.session_state.stroke_width,
-        key="stroke_width"
+        min_value=8,
+        max_value=12,
+        value=10
     )
 
-threshold = st.slider(
-        "Tröskel (svart/vitt)",
-        0, 255,
-        st.session_state.threshold,
-        key="threshold"
-    )
-show_preprocess = st.checkbox(
+    show_preprocess = st.checkbox(
         "Visa preprocess-bild (28×28)",
         value=False
     )
 
-st.divider()
-st.write("Justera tröskel eller pennbredd om modellen gissar fel.")
+    st.divider()
+    st.write("Justera pennbredd om modellen gissar fel.")
 
 # ===============================
 # LAYOUT
@@ -102,9 +97,6 @@ def has_ink(image_data) -> bool:
 
     return ink_pixels > 50
 
-# ===============================
-# PREPROCESS (MNIST-lik)
-# ===============================
 
 def preprocess(image_data, show_preview: bool = False):
     if image_data is None:
