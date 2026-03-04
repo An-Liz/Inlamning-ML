@@ -57,29 +57,28 @@ model, scaler = load_artifacts()
 with st.sidebar:
     st.header("⚙️ Inställningar")
 
-	thicken = st.sidebar.checkbox("Förstärk streck (endast konturer)", value=True)
+thicken = st.sidebar.checkbox("Förstärk streck (endast konturer)", value=True)
 
-    stroke_width = st.slider(
+stroke_width = st.slider(
         "Pennbredd",
         4, 30,
         st.session_state.stroke_width,
         key="stroke_width"
     )
 
-    threshold = st.slider(
+threshold = st.slider(
         "Tröskel (svart/vitt)",
         0, 255,
         st.session_state.threshold,
         key="threshold"
     )
-
-    show_preprocess = st.checkbox(
+show_preprocess = st.checkbox(
         "Visa preprocess-bild (28×28)",
         value=False
     )
 
-    st.divider()
-    st.write("Justera tröskel eller pennbredd om modellen gissar fel.")
+st.divider()
+st.write("Justera tröskel eller pennbredd om modellen gissar fel.")
 
 # ===============================
 # LAYOUT
@@ -203,7 +202,7 @@ def preprocess(image_data, show_preview: bool = False):
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
     return scaler.transform(flat)
 
-	
+
 
 # ===============================
 # CANVAS + BUTTONS
