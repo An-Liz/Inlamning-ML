@@ -7,33 +7,40 @@ from streamlit_drawable_canvas import st_canvas
 
 st.markdown("""
 <style>
-
-/* Alla knappar – samma storlek */
+/* Gemensamt för alla knappar */
 div.stButton > button {
-    height: 3em;
-    width: 180px;
-    border-radius: 8px;
+    height: 3.2em;
+    border-radius: 10px;
     font-weight: 600;
-    border: none;
+    border: none !important;
 }
 
-/* Prediktera – mörkgrön */
+/* Prediktera (primary) – mörkgrön */
 button[kind="primary"] {
     background-color: #1e7e34 !important;
     color: white !important;
     border: none !important;
 }
-
 button[kind="primary"]:hover {
     background-color: #18692c !important;
+    color: white !important;
 }
 
-/* Ta bort röd outline */
-button:focus {
+/* Sekundära knappar – ljusgrå */
+button[kind="secondary"] {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+    border: none !important;
+}
+button[kind="secondary"]:hover {
+    background-color: #dde2e6 !important;
+}
+
+/* Ingen röd fokus-ram */
+button:focus, button:focus-visible {
     outline: none !important;
     box-shadow: none !important;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -247,16 +254,17 @@ with left:
 
   
 
-    col1, col2, col3 = st.columns([1,1,1])
+    # Stor grön knapp överst
+    predict_clicked = st.button("🔮 Prediktera", type="primary", use_container_width=True)
 
-    with col1:
-        predict_clicked = st.button("🔮 Prediktera", type="primary", use_container_width=True)
+    # Två knappar under, bredvid varandra
+    colA, colB = st.columns(2)
 
-    with col2:
-        reset_clicked = st.button("🧽 Prova igen", use_container_width=True)
+    with colA:
+        retry_clicked = st.button("🧽 Prova igen", type="secondary", use_container_width=True)
 
-    with col3:
-        settings_reset = st.button("🔄 Återställ inställningar", use_container_width=True)
+    with colB:
+        reset_settings_clicked = st.button("🔄 Återställ inställningar", type="secondary", use_container_width=True)
 
 
 
