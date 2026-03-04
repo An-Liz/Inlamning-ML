@@ -87,31 +87,73 @@ left, right = st.columns([2, 1], gap="large")
 # ===============================
 # PREPROCESS
 # ===============================
-def preprocess(image_data, threshold_value, show_preview):
-    img = Image.fromarray(image_data.astype("uint8")).convert("L")
-    img = ImageOps.invert(img)
+import numpy as np
+from PIL import Image, ImageOps
 
-    arr = np.array(img).astype(np.uint8)
-    arr = np.where(arr > threshold_value, 255, 0).astype(np.uint8)
-
-    img = Image.fromarray(arr)
-    img_28 = img.resize((28, 28), Image.Resampling.NEAREST)
-
-    if show_preview:
-        st.image(img_28, caption="Efter preprocess (28×28)", width=160)
-
-    flat = np.array(img_28).astype(np.float32).reshape(1, -1)
-    flat_scaled = scaler.transform(flat)
-
-    return flat_scaled
-
-def has_ink(image_data, threshold_value):
+def has_ink(image_data, min_pixels: int = 50) -> bool:
+    """Kollar om användaren faktiskt ritat något."""
     if image_data is None:
         return False
     gray = Image.fromarray(image_data.astype("uint8")).convert("L")
     inv = ImageOps.invert(gray)
     arr = np.array(inv)
-    return (arr > threshold_value).sum() > 50
+    return (arr > 10).sum() > min_pixels  # lågt tröskelvärde bara för 'något finns'
+
+def preprocess(image_data, show_preview: bool = False):
+    """
+    Gör canvas-bilden mer MNIST-lik:
+    - Gråskala + invert
+    - Crop runt 'bläck'
+    - Resize så max-dimension blir 20 px (som MNIST-ish), sen pad till 28x28
+    - Ingen hård threshold (behåll gråskala)
+    """
+    # 1) Canvas RGBA -> grayscale
+    img = Image.fromarray(image_data.astype("uint8")).convert("L")
+
+    # 2) Invertera: svart penna -> vitt "bläck"
+    img = ImageOps.invert(img)
+
+    arr = np.array(img).astype(np.uint8)
+
+    # 3) Hitta bounding box runt pixlar som inte är "bakgrund"
+    ys, xs = np.where(arr > 10)  # 10 = ganska låg, bara för att hitta stroke
+    if len(xs) == 0 or len(ys) == 0:
+        return None
+
+    x0, x1 = xs.min(), xs.max()
+    y0, y1 = ys.min(), ys.max()
+
+    # lite marginal runt siffran
+    pad = 10
+    x0 = max(0, x0 - pad); x1 = min(arr.shape[1] - 1, x1 + pad)
+    y0 = max(0, y0 - pad); y1 = min(arr.shape[0] - 1, y1 + pad)
+
+    cropped = img.crop((x0, y0, x1 + 1, y1 + 1))
+
+    # 4) Resize så att siffran får plats bra i 28x28 (typ 20x20 + padding)
+    w, h = cropped.size
+    if w > h:
+        new_w = 20
+        new_h = max(1, int(round(h * (20 / w))))
+    else:
+        new_h = 20
+        new_w = max(1, int(round(w * (20 / h))))
+
+    resized = cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+    # 5) Pad till 28x28 och centrera
+    canvas_28 = Image.new("L", (28, 28), 0)  # svart bakgrund
+    left = (28 - new_w) // 2
+    top = (28 - new_h) // 2
+    canvas_28.paste(resized, (left, top))
+
+    if show_preview:
+        st.image(canvas_28, caption="Efter preprocess (centrerad 28×28)", width=160)
+
+    # 6) Flatten + scale (som i träningen)
+    flat = np.array(canvas_28).astype(np.float32).reshape(1, -1)
+    flat_scaled = scaler.transform(flat)
+    return flat_scaled
 
 # ===============================
 # CANVAS + BUTTONS
