@@ -91,18 +91,12 @@ Syftet var att simulera hur modellen fungerar på ny, tidigare osedd data – i 
 
 Eftersom handritade siffror skiljer sig från MNIST-datasetet behövde bilden anpassas så att den liknade träningsdatan så mycket som möjligt. Följande steg implementerades i en separat preprocess()-funktion:
 
- - Konvertering till gråskala
-
+- Konvertering till gråskala
 - Invertering (så siffran blir ljus mot mörk bakgrund, som i MNIST)
-
 - Beskärning runt ritad yta
-
 - Skalning så siffran får plats inom 20×20 pixlar
-
 - Centrering med hjälp av viktat center-of-mass
-
 - Placering i en 28×28 canvas
-
 - Transformation med samma scaler som användes under träningen
 
 Genom att återanvända den sparade scalern säkerställdes att modellen fick data i exakt samma format som vid träning, vilket är avgörande för korrekt prediktion.
@@ -117,13 +111,9 @@ Användaren kan även justera pennbredd inom ett begränsat intervall (8–12 pi
 Gränssnittet byggdes med tydlig struktur:
 
 - Ritområde till vänster
-
 - Prediktion och sannolikheter till höger
-
 - Inställningar i en sidopanel
-
 - En tydlig primärknapp för prediktion
-
 - Separata knappar för att rensa canvas och återställa inställningar
 
 Layouten utformades för att göra arbetsflödet intuitivt: rita → prediktera → justera vid behov.
