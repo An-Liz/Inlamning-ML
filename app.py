@@ -136,7 +136,7 @@ def preprocess(image_data, show_preview: bool = False):
 
     # (valfritt) lite thinning så det liknar MNIST-stroke mer
     # Testa först med denna på, om det blir sämre: kommentera bort.
-    cropped = cropped.filter(ImageFilter.MinFilter(3))
+    cropped = cropped.filter(ImageFilter.MinFilter(5))
 
     # 4) Resize så största sidan blir 20 px
     w, h = cropped.size
