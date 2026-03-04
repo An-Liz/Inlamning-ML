@@ -87,26 +87,33 @@ left, right = st.columns([2, 1], gap="large")
 # ===============================
 # PREPROCESS
 # ===============================
-import numpy as np
-from PIL import Image, ImageOps
+# ===============================
+# PREPROCESS (MNIST-lik)
+# ===============================
 
 def has_ink(image_data, min_pixels: int = 50) -> bool:
-    """Kollar om användaren faktiskt ritat något."""
+    """Returnerar True om användaren har ritat något på canvasen."""
     if image_data is None:
         return False
     gray = Image.fromarray(image_data.astype("uint8")).convert("L")
     inv = ImageOps.invert(gray)
     arr = np.array(inv)
-    return (arr > 10).sum() > min_pixels  # lågt tröskelvärde bara för 'något finns'
+    # Lågt tröskelvärde här bara för att avgöra om det finns "bläck"
+    return (arr > 10).sum() > min_pixels
 
-X = preprocess(canvas_result.image_data, show_preview=show_preprocess)
+
+def preprocess(image_data, show_preview: bool = False):
     """
     Gör canvas-bilden mer MNIST-lik:
-    - Gråskala + invert
-    - Crop runt 'bläck'
-    - Resize så max-dimension blir 20 px (som MNIST-ish), sen pad till 28x28
-    - Ingen hård threshold (behåll gråskala)
+    - Gråskala + invert (svart penna -> vitt "bläck")
+    - Crop runt bläcket + lite marginal
+    - Resize så max-dimension blir ~20 px och pad till 28x28 (centrerad)
+    - Behåller gråskala (ingen hård threshold)
+    - Returnerar scaler-transformad 1x784
     """
+    if image_data is None:
+        return None
+
     # 1) Canvas RGBA -> grayscale
     img = Image.fromarray(image_data.astype("uint8")).convert("L")
 
@@ -115,8 +122,8 @@ X = preprocess(canvas_result.image_data, show_preview=show_preprocess)
 
     arr = np.array(img).astype(np.uint8)
 
-    # 3) Hitta bounding box runt pixlar som inte är "bakgrund"
-    ys, xs = np.where(arr > 10)  # 10 = ganska låg, bara för att hitta stroke
+    # 3) Hitta bounding box runt pixlar som inte är bakgrund
+    ys, xs = np.where(arr > 10)
     if len(xs) == 0 or len(ys) == 0:
         return None
 
@@ -125,12 +132,14 @@ X = preprocess(canvas_result.image_data, show_preview=show_preprocess)
 
     # lite marginal runt siffran
     pad = 10
-    x0 = max(0, x0 - pad); x1 = min(arr.shape[1] - 1, x1 + pad)
-    y0 = max(0, y0 - pad); y1 = min(arr.shape[0] - 1, y1 + pad)
+    x0 = max(0, x0 - pad)
+    x1 = min(arr.shape[1] - 1, x1 + pad)
+    y0 = max(0, y0 - pad)
+    y1 = min(arr.shape[0] - 1, y1 + pad)
 
     cropped = img.crop((x0, y0, x1 + 1, y1 + 1))
 
-    # 4) Resize så att siffran får plats bra i 28x28 (typ 20x20 + padding)
+    # 4) Resize så siffran får "MNIST-storlek" i 28x28 (ca 20px + padding)
     w, h = cropped.size
     if w > h:
         new_w = 20
@@ -153,6 +162,7 @@ X = preprocess(canvas_result.image_data, show_preview=show_preprocess)
     # 6) Flatten + scale (som i träningen)
     flat = np.array(canvas_28).astype(np.float32).reshape(1, -1)
     flat_scaled = scaler.transform(flat)
+
     return flat_scaled
 
 # ===============================
