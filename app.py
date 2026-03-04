@@ -174,7 +174,7 @@ def preprocess(image_data, show_preview: bool = False):
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
     return scaler.transform(flat)
 
-	def has_ink(image_data) -> bool:
+def has_ink(image_data) -> bool:
     """
     Kollar om det faktiskt finns något ritat på canvasen.
     Undviker att modellen försöker prediktera tom bild.
