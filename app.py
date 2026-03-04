@@ -57,6 +57,8 @@ model, scaler = load_artifacts()
 with st.sidebar:
     st.header("⚙️ Inställningar")
 
+	thicken = st.sidebar.checkbox("Förstärk streck (endast konturer)", value=True)
+
     stroke_width = st.slider(
         "Pennbredd",
         4, 30,
@@ -131,7 +133,7 @@ def preprocess(image_data, show_preview: bool = False):
     cropped = img.crop((x0, y0, x1 + 1, y1 + 1))
 
     # 3) Blur efter crop (mindre halo)
-    cropped = cropped.filter(ImageFilter.GaussianBlur(radius=0.6))
+    # cropped = cropped.filter(ImageFilter.GaussianBlur(radius=0.6))
 
     # (valfritt) lite thinning så det liknar MNIST-stroke mer
     # Testa först med denna på, om det blir sämre: kommentera bort.
@@ -189,15 +191,16 @@ def preprocess(image_data, show_preview: bool = False):
 
 
     img_tmp = Image.fromarray(a.astype(np.uint8))
-    img_tmp = img_tmp.filter(ImageFilter.MaxFilter(3))
+    if thicken:
+        img_tmp = img_tmp.filter(ImageFilter.MaxFilter(3))
     img_final = img_tmp
 
     if show_preview:
        st.image(img_final, caption="Preprocess (MNIST-lik 28×28)", width=160)
 
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
-    # return scaler.transform(flat)
-    return flat
+    return scaler.transform(flat)
+   
 
 # ===============================
 # CANVAS + BUTTONS
