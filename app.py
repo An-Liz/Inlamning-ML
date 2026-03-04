@@ -93,45 +93,38 @@ left, right = st.columns([2, 1], gap="large")
 # ===============================
 
 def preprocess(image_data, show_preview: bool = False):
-    """
-    Preprocess som gör handritat mer MNIST-likt:
-    - Gråskala
-    - Invertera så siffran blir ljus på mörk bakgrund (som MNIST)
-    - Lätt blur (anti-alias)
-    - Crop runt bläck
-    - Resize så siffran får plats i 20x20
-    - Center-of-mass centering i 28x28
-    """
     if image_data is None:
         return None
 
-    # 1) RGBA -> grayscale (0=svart, 255=vitt)
+    # 1) RGBA -> grayscale
     img = Image.fromarray(image_data.astype("uint8")).convert("L")
 
-    # 2) Invertera: svart penna på vit bakgrund -> vit siffra på svart bakgrund
+    # 2) Invertera: svart penna -> vit siffra (MNIST-stil)
     img = ImageOps.invert(img)
 
-    # 3) Lätt blur för att undvika "kantiga block"
-    img = img.filter(ImageFilter.GaussianBlur(radius=0.8))
-
-    arr = np.array(img).astype(np.uint8)
-
-    # 4) Crop runt bläck
-    ys, xs = np.where(arr > 20)  # 20 = ignorerar svagt brus
+    # --- CROP: görs på OBLURRAD bild för stabil bounding box ---
+    arr0 = np.array(img).astype(np.uint8)
+    ys, xs = np.where(arr0 > 30)  # lite högre än 20 för att slippa brus
     if len(xs) == 0 or len(ys) == 0:
         return None
 
     x0, x1 = xs.min(), xs.max()
     y0, y1 = ys.min(), ys.max()
 
-    # lite marginal
     pad = 8
-    x0 = max(0, x0 - pad); x1 = min(arr.shape[1] - 1, x1 + pad)
-    y0 = max(0, y0 - pad); y1 = min(arr.shape[0] - 1, y1 + pad)
+    x0 = max(0, x0 - pad); x1 = min(arr0.shape[1] - 1, x1 + pad)
+    y0 = max(0, y0 - pad); y1 = min(arr0.shape[0] - 1, y1 + pad)
 
     cropped = img.crop((x0, y0, x1 + 1, y1 + 1))
 
-    # 5) Resize så största sidan blir 20 px (MNIST-siffran är typ 20x20 i en 28x28)
+    # 3) Blur efter crop (mindre halo)
+    cropped = cropped.filter(ImageFilter.GaussianBlur(radius=0.6))
+
+    # (valfritt) lite thinning så det liknar MNIST-stroke mer
+    # Testa först med denna på, om det blir sämre: kommentera bort.
+    cropped = cropped.filter(ImageFilter.MinFilter(3))
+
+    # 4) Resize så största sidan blir 20 px
     w, h = cropped.size
     if w > h:
         new_w = 20
@@ -142,54 +135,40 @@ def preprocess(image_data, show_preview: bool = False):
 
     resized = cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
-    # 6) Lägg in i 28x28
+    # 5) Lägg in i 28x28
     canvas_28 = Image.new("L", (28, 28), 0)
     left = (28 - new_w) // 2
     top = (28 - new_h) // 2
     canvas_28.paste(resized, (left, top))
 
-    # 7) Center-of-mass centering (flytta till mitten)
+    # 6) Viktat center-of-mass (riktig COM)
     a = np.array(canvas_28).astype(np.float32)
-    a = a / (a.max() + 1e-6)
+    a = np.clip(a, 0, 255)
 
-    ys2, xs2 = np.nonzero(a > 0.05)
-    if len(xs2) > 0 and len(ys2) > 0:
-        cx = xs2.mean()
-        cy = ys2.mean()
+    # använd intensitet som vikt, men ignorera nästan-svart bakgrund
+    mask = a > 20
+    if mask.sum() > 10:
+        ys2, xs2 = np.nonzero(mask)
+        weights = a[ys2, xs2]
+        cx = (xs2 * weights).sum() / weights.sum()
+        cy = (ys2 * weights).sum() / weights.sum()
+
         shift_x = int(round(14 - cx))
         shift_y = int(round(14 - cy))
 
-        a_shift = np.zeros_like(a)
+        shifted = np.zeros_like(a)
         y_from = max(0, -shift_y); y_to = min(28, 28 - shift_y)
         x_from = max(0, -shift_x); x_to = min(28, 28 - shift_x)
+        shifted[y_from + shift_y:y_to + shift_y, x_from + shift_x:x_to + shift_x] = a[y_from:y_to, x_from:x_to]
+        a = shifted
 
-        a_shift[y_from + shift_y:y_to + shift_y, x_from + shift_x:x_to + shift_x] = a[y_from:y_to, x_from:x_to]
-        a = a_shift
-
-    img_final = Image.fromarray((a * 255).astype(np.uint8))
+    img_final = Image.fromarray(a.astype(np.uint8))
 
     if show_preview:
         st.image(img_final, caption="Preprocess (MNIST-lik 28×28)", width=160)
 
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
     return scaler.transform(flat)
-
-def has_ink(image_data) -> bool:
-    """
-    Kollar om det faktiskt finns något ritat på canvasen.
-    Undviker att modellen försöker prediktera tom bild.
-    """
-    if image_data is None:
-        return False
-
-    gray = Image.fromarray(image_data.astype("uint8")).convert("L")
-    arr = np.array(gray)
-
-    # Canvas är vit bakgrund (255)
-    # Bläck är mörkt (< 250 ungefär)
-    ink_pixels = (arr < 250).sum()
-
-    return ink_pixels > 50  # kräver minst lite ritad yta
 
 # ===============================
 # CANVAS + BUTTONS
