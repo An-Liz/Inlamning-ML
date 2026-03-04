@@ -88,6 +88,20 @@ left, right = st.columns([2, 1], gap="large")
 # ===============================
 # PREPROCESS
 # ===============================
+
+def has_ink(image_data) -> bool:
+    if image_data is None:
+        return False
+
+    gray = Image.fromarray(image_data.astype("uint8")).convert("L")
+    arr = np.array(gray)
+
+    # Canvas är vit bakgrund (255)
+    # Bläck är mörkt (< 250)
+    ink_pixels = (arr < 250).sum()
+
+    return ink_pixels > 50
+
 # ===============================
 # PREPROCESS (MNIST-lik)
 # ===============================
