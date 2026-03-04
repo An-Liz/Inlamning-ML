@@ -5,7 +5,6 @@ from PIL import Image, ImageOps, ImageFilter
 import matplotlib.pyplot as plt
 from streamlit_drawable_canvas import st_canvas
 
-
 # ===============================
 # PAGE
 # ===============================
@@ -136,7 +135,7 @@ def preprocess(image_data, show_preview: bool = False):
 
     # (valfritt) lite thinning så det liknar MNIST-stroke mer
     # Testa först med denna på, om det blir sämre: kommentera bort.
-    cropped = cropped.filter(ImageFilter.MinFilter(5))
+   # cropped = cropped.filter(ImageFilter.MinFilter())
 
     # 4) Resize så största sidan blir 20 px
     w, h = cropped.size
@@ -175,6 +174,17 @@ def preprocess(image_data, show_preview: bool = False):
         x_from = max(0, -shift_x); x_to = min(28, 28 - shift_x)
         shifted[y_from + shift_y:y_to + shift_y, x_from + shift_x:x_to + shift_x] = a[y_from:y_to, x_from:x_to]
         a = shifted
+
+	# stärk kontrast
+    a = np.clip(a, 0, 255)
+
+    # ta bort svag grå dimma
+    a[a < 40] = 0
+
+    # skala upp så max blir 255
+    mx = a.max()
+    if mx > 0:
+        a = a * (255.0 / mx)
 
     img_final = Image.fromarray(a.astype(np.uint8))
 
@@ -249,3 +259,4 @@ with right:
                     st.pyplot(fig)
     else:
         st.info("Tryck på **Prediktera** när du ritat en siffra.")
+
