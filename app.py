@@ -184,7 +184,7 @@ def preprocess(image_data, show_preview: bool = False):
     # skala upp så max blir 255
     # mx = a.max()
     # if mx > 0:
-        a = a * (255.0 / mx)
+       # a = a * (255.0 / mx)
 
     img_final = Image.fromarray(a.astype(np.uint8))
 
