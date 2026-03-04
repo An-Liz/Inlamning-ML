@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 st.title("🔢 Prova sifferigenkänning med MNIST")
-st.caption("Rita en siffra till vänster och klicka på **Prediktera**.")
+st.caption("Rita en siffra till vänster och klicka på **Prediktera**. Du kan ändra inställningar till vänster.")
 st.divider()
 
 # ===============================
