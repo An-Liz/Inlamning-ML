@@ -9,12 +9,12 @@ from streamlit_drawable_canvas import st_canvas
 # PAGE
 # ===============================
 st.set_page_config(
-    page_title="MNIST – Sifferigenkänning",
-    page_icon="✍️",
+    page_title="Prova sifferigenkänning med MNIST",
+    page_icon="🔢",
     layout="wide"
 )
 
-st.title("✍️ MNIST – Sifferigenkänning")
+st.title("🔢 Prova sifferigenkänning med MNIST")
 st.caption("Rita en siffra till vänster och klicka på **Prediktera**.")
 st.divider()
 
@@ -29,6 +29,16 @@ if "stroke_width" not in st.session_state:
 
 if "threshold" not in st.session_state:
     st.session_state.threshold = 120
+
+	if "do_reset_settings" not in st.session_state:
+    st.session_state.do_reset_settings = False
+
+# Om vi tryckte "Återställ inställningar" förra körningen
+if st.session_state.do_reset_settings:
+    st.session_state.canvas_key += 1
+    st.session_state["stroke_width"] = 12
+    st.session_state["threshold"] = 120
+    st.session_state.do_reset_settings = False
 
 # ===============================
 # LOAD MODEL + SCALER
@@ -134,10 +144,9 @@ with left:
             st.rerun()
 
     with c3:
+    with c3:
         if st.button("🔄 Återställ inställningar", use_container_width=True):
-            st.session_state.canvas_key += 1
-            st.session_state.stroke_width = 12
-            st.session_state.threshold = 120
+            st.session_state.do_reset_settings = True
             st.rerun()
 
 # ===============================
