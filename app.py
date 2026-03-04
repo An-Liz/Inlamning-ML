@@ -30,7 +30,7 @@ if "stroke_width" not in st.session_state:
 if "threshold" not in st.session_state:
     st.session_state.threshold = 120
 
-	if "do_reset_settings" not in st.session_state:
+if "do_reset_settings" not in st.session_state:
     st.session_state.do_reset_settings = False
 
 # Om vi tryckte "Återställ inställningar" förra körningen
