@@ -10,8 +10,13 @@ st.set_page_config(page_title="MNIST – Sifferigenkänning")
 st.title("✍️ MNIST – Sifferigenkänning")
 
 # Ladda modell och scaler
-model = joblib.load("mnist_model.pkl")
-scaler = joblib.load("mnist_scaler.pkl")
+@st.cache_resource
+def load_artifacts():
+    model = joblib.load("mnist_model.pkl")
+    scaler = joblib.load("mnist_scaler.pkl")
+    return model, scaler
+
+model, scaler = load_artifacts()
 
 st.success("Modell och scaler laddade!")
 
