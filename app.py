@@ -196,7 +196,8 @@ def preprocess(image_data, show_preview: bool = False):
        st.image(img_final, caption="Preprocess (MNIST-lik 28×28)", width=160)
 
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
-    return scaler.transform(flat)
+    # return scaler.transform(flat)
+	return flat
 
 # ===============================
 # CANVAS + BUTTONS
