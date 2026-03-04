@@ -210,7 +210,7 @@ with right:
         if canvas_result.image_data is None or not has_ink(canvas_result.image_data):
             st.warning("Rita en siffra först 🙂")
         else:
-            X = preprocess(canvas_result.image_data, threshold, show_preprocess)
+            X = preprocess(canvas_result.image_data, show_preprocess)
 
             pred = model.predict(X)[0]
             st.success(f"Prediktion: **{pred}**")
