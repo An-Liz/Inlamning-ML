@@ -186,10 +186,14 @@ def preprocess(image_data, show_preview: bool = False):
     # if mx > 0:
        # a = a * (255.0 / mx)
 
-    img_final = Image.fromarray(a.astype(np.uint8))
+
+
+    img_tmp = Image.fromarray(a.astype(np.uint8))
+    img_tmp = img_tmp.filter(ImageFilter.MaxFilter(3))
+    img_final = img_tmp
 
     if show_preview:
-        st.image(img_final, caption="Preprocess (MNIST-lik 28×28)", width=160)
+       st.image(img_final, caption="Preprocess (MNIST-lik 28×28)", width=160)
 
     flat = np.array(img_final).astype(np.float32).reshape(1, -1)
     return scaler.transform(flat)
